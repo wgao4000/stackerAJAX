@@ -1,3 +1,4 @@
+//small changes
 $(document).ready( function() {
 	$('.unanswered-getter').submit( function(event){
 		// zero out results if previous search has run
