@@ -18,32 +18,49 @@ $(document).ready( function() {
 
 // this function takes the question object returned by StackOverflow 
 // and creates new result to be appended to DOM
-var showQuestion = function(question) {
+var showQuestion = function(question,num) {
+    var peopleid,peoplename,peoplereputation;
 	
-	// clone our result template code
-	var result = $('.templates .question').clone();
-	
-	// Set the question properties in result
-	var questionElem = result.find('.question-text a');
-	questionElem.attr('href', question.link);
-	questionElem.text(question.title);
+	 // clone our result template code
+	 var result = $('.templates .question').clone();
+	 var questionElem = result.find('.question-text a');
+	 var asked = result.find('.asked-date');
+	 var viewed = result.find('.viewed');
+	 // Set the question properties in result
+	if(num==0){
+	 $(".q1").show();
+     $(".a1").show();
+     $(".v1").show();
+	 questionElem.attr('href', question.link);
+	 questionElem.text(question.title);
 
-	// set the date asked property in result
-	var asked = result.find('.asked-date');
-	var date = new Date(1000*question.creation_date);
-	asked.text(date.toString());
+	 // set the date asked property in result
+	 
+	 var date = new Date(1000*question.creation_date);
+	 asked.text(date.toString());
 
-	// set the #views for question property in result
-	var viewed = result.find('.viewed');
-	viewed.text(question.view_count);
-
+	 // set the #views for question property in result
+	 
+	 viewed.text(question.view_count);
+     peopleid=question.owner.user_id;
+	 peoplename=question.owner.display_name;
+	 peoplereputation=question.owner.reputation
+	}		 
+	else if(num==1){
+         $(".q1").hide();
+         $(".a1").hide();
+         $(".v1").hide();
+		 peopleid=question.user.user_id;
+		 peoplename=question.user.display_name;
+		 peoplereputation=question.user.reputation;
+    }
 	// set some properties related to asker
 	var asker = result.find('.asker');
-	asker.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + question.owner.user_id + ' >' +
-													question.owner.display_name +
+	asker.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + peopleid + ' >' +
+													peoplename +
 												'</a>' +
 							'</p>' +
- 							'<p>Reputation: ' + question.owner.reputation + '</p>'
+ 							'<p>Reputation: ' + peoplereputation + '</p>'
 	);
 
 	return result;
@@ -86,7 +103,7 @@ var getUnanswered = function(tags) {
 		$('.search-results').html(searchResults);
 
 		$.each(result.items, function(i, item) {
-			var question = showQuestion(item);
+			var question = showQuestion(item,0);
 			$('.results').append(question);
 		});
 	})
@@ -101,21 +118,23 @@ var gettopanswers = function(answers) {
 	var request = {tagged: answers,
 				   site: 'stackoverflow',
 					};
-	alert(request);
+
 	var result = $.ajax({
-		url: "http://api.stackexchange.com/2.2/tags/{tag}/top-answerers/all_time",
-		data: request,
+		url: "http://api.stackexchange.com/2.2/tags/"+request.tagged+"/top-answerers/all_time",
+	    data: request,
 		dataType: "jsonp",
 		type: "GET",
-		});
-	alert(result);
-	.done(function(result){
+		})
+
+  .done(function(result){
+  	    
 		var searchResults = showSearchResults(request.tagged, result.items.length);
 
 		$('.search-results').html(searchResults);
 
 		$.each(result.items, function(i, item) {
-			var question = showQuestion(item);
+		 //	alert(JSON.stringify(item, null, 4));
+			var question = showQuestion(item,1);
 			$('.results').append(question);
 		});
 	})
